@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+
+    <title>GoGreen Enterprise | Dashboard ESG 2026</title>
+</head>
+<body class="bg-slate-50 font-sans p-6 md:p-12">
+
+<div class="max-w-5xl mx-auto space-y-8">
+    <header class="bg-emerald-950 text-white p-8 rounded-3xl shadow-2xl flex justify-between items-end">
+        <div>
+            <h1 class="text-3xl font-black">GoGreen Analytics 2026</h1>
+            <p class="text-emerald-400 mt-2">Indonesia National Sustainability & Circular Economy Dashboard</p>
+        </div>
+        <div class="bg-emerald-700 px-6 py-2 rounded-2xl border border-emerald-500">
+            <p class="text-emerald-200 text-xs uppercase tracking-widest font-bold">Project Team</p>
+            <p class="text-white text-xl font-black">KELOMPOK 8</p>
+        </div>
+    </header>
+
+    <div id="model-status" class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-2xl text-center font-semibold text-sm shadow-sm animate-pulse">
+        <i class="fa-solid fa-brain mr-2 animate-bounce"></i> Sedang memuat Model CNN (MobileNet)... Mohon tunggu sebentar.
+    </div>
+
+    <div id="drop-zone" class="bg-white border-4 border-dashed border-emerald-400 rounded-3xl p-10 text-center cursor-pointer hover:bg-emerald-50 transition-all shadow-lg pointer-events-none opacity-50">
+        <i class="fa-solid fa-cloud-arrow-up text-4xl text-emerald-600 mb-4"></i>
+        <h2 class="text-xl font-bold text-slate-800">Drag & Drop Gambar Aset di Sini</h2>
+        <p class="text-sm text-slate-500 mt-2">Pemindaian Material Berbasis AI CNN - Analisis Kepatuhan ESG 2026</p>
+        <input type="file" id="file-input" class="hidden">
+    </div>
+
+    <div id="analysis-panel" class="hidden bg-slate-900 text-white rounded-3xl p-8 shadow-2xl">
+        <div class="flex flex-col md:flex-row gap-8">
+            <div class="relative">
+                <img id="preview-image" class="w-48 h-48 rounded-2xl object-cover border-4 border-emerald-500 shadow-xl">
+                <span id="accuracy-badge" class="absolute -bottom-3 left-1/2 transform -translate-x-1/2 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">90% Match</span>
+            </div>
+            <div class="flex-1">
+                <h3 id="audit-title" class="text-2xl font-black text-emerald-400 mb-2">--</h3>
+                <div id="audit-details" class="text-slate-300 text-sm leading-relaxed space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <section class="bg-white p-8 rounded-3xl shadow-sm border">
+        <h3 class="font-bold text-slate-800 mb-6 uppercase text-xs tracking-widest">Tren Kepatuhan & Pengelolaan Nasional (2025-2026)</h3>
+        <canvas id="compChart" class="h-64"></canvas>
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-600">
+            <div class="p-4 bg-slate-50 rounded-xl">
+                <p class="font-bold text-emerald-800">Analisis Progress 2026</p>
+                <p class="mt-2">Terjadi lonjakan kepatuhan dari 27% ke 52% karena penerapan teknologi Waste-to-Energy (WtE) yang masif di area urban.</p>
+            </div>
+            <div class="p-4 bg-slate-50 rounded-xl">
+                <p class="font-bold text-emerald-800">Faktor Pendorong</p>
+                <p class="mt-2">Digitalisasi bank sampah dan regulasi ketat OJK-51 memaksa perusahaan untuk memperbaiki rantai pasok sirkular.</p>
+            </div>
+            <div class="p-4 bg-slate-50 rounded-xl">
+                <p class="font-bold text-emerald-800">Proyeksi Masa Depan</p>
+                <p class="mt-2">Dengan tren saat ini, target nasional 63% pengelolaan sampah diharapkan tercapai lebih cepat pada akhir 2027.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-white p-8 rounded-3xl shadow-sm border">
+        <h3 class="font-bold text-slate-800 mb-6 uppercase text-xs tracking-widest">Berita & Kebijakan Lingkungan Indonesia</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                <span class="text-[10px] font-bold text-emerald-600 uppercase">Juni 2026</span>
+                <p class="text-sm font-semibold mt-1">Peningkatan 15% Kapasitas WtE di Bekasi</p>
+            </div>
+            <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                <span class="text-[10px] font-bold text-blue-600 uppercase">Mei 2026</span>
+                <p class="text-sm font-semibold mt-1">OJK Perketat Laporan ESG Perbankan</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    // --- LOGIKA GRAFIK (CHART.JS) ---
+    new Chart(document.getElementById('compChart'), {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [
+                { label: 'Kepatuhan 2025 (%)', data: [22, 23, 24, 25, 26, 27], borderColor: '#94a3b8', tension: 0.3 },
+                { label: 'Kepatuhan 2026 (%)', data: [35, 38, 42, 45, 48, 52], borderColor: '#059669', tension: 0.3, fill: true, backgroundColor: 'rgba(5, 150, 105, 0.1)' }
+            ]
+        }
+    });
+
+    // --- LOGIKA INTEGRASI CNN (TENSORFLOW.JS) ---
+    let net;
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const modelStatus = document.getElementById('model-status');
+
+    // Fungsi untuk memuat Model CNN MobileNet secara Asynchronous
+    async function loadCNNModel() {
+        try {
+            net = await mobilenet.load();
+            modelStatus.className = "bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-2xl text-center font-semibold text-sm shadow-sm";
+            modelStatus.innerHTML = '<i class="fa-solid fa-circle-check mr-2 text-emerald-600"></i> Model CNN Berhasil Dimuat! Silakan unggah foto.';
+            
+            // Aktifkan area drop-zone setelah model siap
+            dropZone.classList.remove('pointer-events-none', 'opacity-50');
+        } catch (error) {
+            modelStatus.className = "bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-2xl text-center font-semibold text-sm shadow-sm";
+            modelStatus.innerHTML = '<i class="fa-solid fa-circle-xmark mr-2 text-rose-600"></i> Gagal memuat model. Periksa koneksi internet Anda.';
+        }
+    }
+
+    // Jalankan fungsi pemuatan model saat halaman dibuka
+    loadCNNModel();
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+            const imgElement = document.getElementById('preview-image');
+            imgElement.src = ev.target.result;
+            
+            // Tampilkan panel, pasang animasi/tulisan loading sewaktu CNN menganalisis gambar
+            document.getElementById('analysis-panel').classList.remove('hidden');
+            document.getElementById('audit-title').textContent = "🤖 CNN sedang memindai piksel gambar...";
+            document.getElementById('audit-details').innerHTML = "";
+
+            // Menunggu gambar selesai dimuat penuh oleh tag <img> sebelum dianalisis CNN
+            imgElement.onload = async () => {
+                // PROSES KLASIFIKASI GAMBAR OLEH CNN
+                const result = await net.classify(imgElement);
+                
+                // Ambil prediksi teratas (index ke-0)
+                const topPrediction = result[0];
+                const labelObjek = topPrediction.className.toLowerCase();
+                const akurasi = Math.round(topPrediction.probability * 100);
+
+                // Update badge akurasi model
+                document.getElementById('accuracy-badge').textContent = `${akurasi}% Confidence`;
+
+                // Logika Penentuan kategori ESG berdasarkan label objek dari CNN
+                // Kita cek apakah hasil deteksi mengandung unsur botol/plastik/kontainer
+                const isPlastic = labelObjek.includes('bottle') || labelObjek.includes('plastic') || labelObjek.includes('container') || labelObjek.includes('cup');
+
+                if (isPlastic) {
+                    document.getElementById('audit-title').textContent = `Analisis Sampah Plastik (${topPrediction.className})`;
+                    document.getElementById('audit-details').innerHTML = `
+                        <p><b>Deskripsi:</b> Terdeteksi material plastik/wadah sintetis berbahaya bagi ekosistem jika tidak diurai.</p>
+                        <p><b>Cara Daur Ulang:</b> Dipisahkan, dibersihkan, dan disetor ke bank sampah untuk dicacah menjadi pellet plastik berkualitas tinggi.</p>
+                        <p><b>Dampak Penggunaan Berulang:</b> Tidak disarankan untuk kemasan pangan karena risiko degradasi mikroplastik berbahaya.</p>
+                    `;
+                } else {
+                    // Jika bukan plastik, diasumsikan organik/objek alamiah lainnya dalam simulasi ini
+                    document.getElementById('audit-title').textContent = `Analisis Sampah Organik / Non-Plastik (${topPrediction.className})`;
+                    document.getElementById('audit-details').innerHTML = `
+                        <p><b>Deskripsi:</b> Terdeteksi material organik, tanaman, makanan, atau benda non-plastik sirkular.</p>
+                        <p><b>Cara Daur Ulang:</b> Diolah melalui proses pengomposan menjadi pupuk organik, atau dimasukkan ke dalam mesin biodigester menjadi biogas.</p>
+                        <p><b>Dampak Penggunaan Berulang:</b> Berpotensi melepaskan gas metana jika menumpuk di TPA, namun bernilai ekonomi tinggi jika diproses menjadi pupuk alami.</p>
+                    `;
+                }
+            };
+        };
+        reader.readAsDataURL(file);
+    });
+</script>
+</body>
+</html>
